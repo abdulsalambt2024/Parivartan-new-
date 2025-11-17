@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Task, TaskStatus } from '../types';
 
@@ -43,11 +42,67 @@ const TaskColumn: React.FC<{ title: TaskStatus; tasks: Task[]; color: string; on
     </div>
 );
 
+const AddTaskModal: React.FC<{ onClose: () => void; onAddTask: (task: Omit<Task, 'id' | 'status'>) => void; }> = ({ onClose, onAddTask }) => {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [assignee, setAssignee] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onAddTask({ title, description, assignee });
+        onClose();
+    };
+
+    return (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl transform transition-all scale-95 opacity-0 animate-scale-in">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Create a New Task</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
+                        <input type="text" id="title" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary" required />
+                    </div>
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={3} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary" required></textarea>
+                    </div>
+                     <div>
+                        <label htmlFor="assignee" className="block text-sm font-medium text-gray-700">Assignee</label>
+                        <input type="text" id="assignee" value={assignee} onChange={e => setAssignee(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary" required />
+                    </div>
+                    <div className="flex justify-end space-x-4 pt-4">
+                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+                        <button type="submit" className="px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">Create Task</button>
+                    </div>
+                </form>
+            </div>
+            <style>{`
+                @keyframes scale-in {
+                    from { transform: scale(0.95); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                .animate-scale-in { animation: scale-in 0.3s forwards cubic-bezier(0.165, 0.84, 0.44, 1); }
+            `}</style>
+        </div>
+    );
+};
+
+
 const Tasks: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>(initialTasks);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const moveTask = (id: number, newStatus: TaskStatus) => {
         setTasks(tasks.map(task => task.id === id ? { ...task, status: newStatus } : task));
+    };
+    
+    const addTask = (task: Omit<Task, 'id' | 'status'>) => {
+        const newTask: Task = {
+            ...task,
+            id: Date.now(),
+            status: TaskStatus.ToDo
+        };
+        setTasks(prevTasks => [newTask, ...prevTasks]);
     };
 
     const columns: { title: TaskStatus; color: string }[] = [
@@ -58,10 +113,18 @@ const Tasks: React.FC = () => {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">Task Board</h1>
-                <p className="mt-2 text-lg text-gray-600">Organize, assign, and track all committee tasks.</p>
+             <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">Task Board</h1>
+                    <p className="mt-2 text-lg text-gray-600">Organize, assign, and track all committee tasks.</p>
+                </div>
+                 <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-transform hover:scale-105">
+                    New Task
+                </button>
             </div>
+
+            {isModalOpen && <AddTaskModal onClose={() => setIsModalOpen(false)} onAddTask={addTask} />}
+            
             <div className="flex flex-col md:flex-row gap-6">
                 {columns.map(col => (
                     <TaskColumn

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Page } from '../types';
-import { DashboardIcon, PostIcon, AnnouncementIcon, AchievementIcon, DonationIcon, EventIcon, TaskIcon, ChatIcon, CloseIcon } from './Icons';
+import { DashboardIcon, PostIcon, AnnouncementIcon, AchievementIcon, DonationIcon, EventIcon, TaskIcon, ChatIcon, CloseIcon, LogoutIcon } from './Icons';
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -35,6 +35,7 @@ interface NavbarProps {
     setCurrentPage: (page: Page) => void;
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
+    onLogout: () => void;
 }
 
 const navItems: { label: Page; icon: React.ReactNode }[] = [
@@ -48,7 +49,7 @@ const navItems: { label: Page; icon: React.ReactNode }[] = [
     { label: 'Chat', icon: <ChatIcon className="w-6 h-6" /> },
 ];
 
-const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, isOpen, setIsOpen }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, isOpen, setIsOpen, onLogout }) => {
     const sidebarClasses = `
         fixed lg:relative inset-y-0 left-0
         transform ${isOpen ? 'translateX(0)' : '-translate-x-full'} lg:translate-x-0
@@ -79,7 +80,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, isOpen, se
                     ))}
                 </ul>
                 <div className="p-4 border-t border-indigo-700">
-                    <p className="text-sm text-indigo-300">&copy; 2024 Parivartan Committee</p>
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onLogout();
+                      }}
+                      className="flex items-center p-3 my-1 rounded-lg transition-colors text-gray-300 hover:bg-red-600 hover:text-white"
+                    >
+                      <LogoutIcon className="w-6 h-6" />
+                      <span className="ml-3 font-medium">Logout</span>
+                    </a>
+                    <p className="text-sm text-indigo-300 text-center mt-4">&copy; 2024 Parivartan Committee</p>
                 </div>
             </nav>
         </>

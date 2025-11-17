@@ -11,10 +11,12 @@ import Tasks from './components/Tasks';
 import Chat from './components/Chat';
 import { Page } from './types';
 import { MenuIcon } from './components/Icons';
+import AuthPage from './components/Auth';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('Dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const renderPage = useCallback(() => {
     switch (currentPage) {
@@ -44,9 +46,22 @@ const App: React.FC = () => {
     setIsSidebarOpen(false); // Close sidebar on navigation
   };
 
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentPage('Dashboard');
+  };
+
+  if (!isAuthenticated) {
+    return <AuthPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
-      <Navbar currentPage={currentPage} setCurrentPage={handleSetCurrentPage} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen}/>
+      <Navbar currentPage={currentPage} setCurrentPage={handleSetCurrentPage} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} onLogout={handleLogout} />
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
             <h1 className="text-xl font-bold text-primary">Parivartan</h1>
